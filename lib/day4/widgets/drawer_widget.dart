@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/day4/auth/login_page.dart';
 import 'package:flutter_application_1/day4/models/post.dart';
 import 'package:flutter_application_1/day4/profile_page.dart.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class NavigationDrawerr extends StatefulWidget {
   final List<Posts> allPosts;
@@ -35,10 +34,10 @@ class _NavigationDrawerrState extends State<NavigationDrawerr> {
   }
 
   Future<void> _loadCurrentUser() async {
-    final prefs = await SharedPreferences.getInstance();
+    final user = FirebaseAuth.instance.currentUser;
     setState(() {
-      username = prefs.getString('name') ?? "Anonymous user";
-      userEmail = prefs.getString('email') ?? "Anonymous mail";
+      username = user!.displayName ?? 'Anonymous user';
+      userEmail = user.email ?? 'Anonymous user';
     });
   }
 

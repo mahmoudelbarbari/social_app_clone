@@ -1,5 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_application_1/day4/models/post.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -29,6 +30,7 @@ class _ProfileScreenState extends State<ProfilePage> {
   String userAddress = '';
   String userPhone = '';
   String userGender = '';
+  int userLikes = 0;
   String userDescription = 'Flutter enthusiast and app developer.';
 
   @override
@@ -38,14 +40,21 @@ class _ProfileScreenState extends State<ProfilePage> {
   }
 
   Future<void> _loadUserInfo() async {
-    final prefs = await SharedPreferences.getInstance();
+    final currentUser = FirebaseAuth.instance.currentUser;
+    int totalLikes = 0;
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection('posts')
+        .where('userId', isEqualTo: currentUser!.uid)
+        .get();
+    for (var doc in querySnapshot.docs) {
+      final data = doc.data();
+      final List likedBy = data['likedBy'] ?? [];
+      totalLikes += likedBy.length;
+    }
     setState(() {
-      userName = prefs.getString('name') ?? 'No Name';
-      userEmail = prefs.getString('email') ?? 'No Email';
-      userJob = prefs.getString('job') ?? '';
-      userAddress = prefs.getString('address') ?? '';
-      userPhone = prefs.getString('phone') ?? '';
-      userGender = prefs.getString('gender') ?? '';
+      userName = currentUser.displayName ?? 'No Name';
+      userEmail = currentUser.email ?? "No Email";
+      userLikes = totalLikes;
     });
   }
 
@@ -92,49 +101,20 @@ class _ProfileScreenState extends State<ProfilePage> {
             ),
           ),
           SizedBox(height: 16),
-          Center(
-            child: Text(
-              userName,
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-          ),
-          Center(
-            child: Text(
-              userEmail,
-              style: TextStyle(fontSize: 16, color: Colors.grey[700]),
-            ),
-          ),
-          SizedBox(height: 16),
           Card(
             margin: EdgeInsets.symmetric(vertical: 8),
             child: ListTile(
-              leading: Icon(Icons.info_outline),
-              title: Text('Job'),
-              subtitle: Text(userJob),
+              leading: Icon(Icons.person),
+              title: Text('Name'),
+              subtitle: Text(userName),
             ),
           ),
           Card(
             margin: EdgeInsets.symmetric(vertical: 8),
             child: ListTile(
-              leading: Icon(Icons.home),
-              title: Text('Address'),
-              subtitle: Text(userAddress),
-            ),
-          ),
-          Card(
-            margin: EdgeInsets.symmetric(vertical: 8),
-            child: ListTile(
-              leading: Icon(Icons.phone),
-              title: Text('Phone'),
-              subtitle: Text(userPhone),
-            ),
-          ),
-          Card(
-            margin: EdgeInsets.symmetric(vertical: 8),
-            child: ListTile(
-              leading: Icon(Icons.person_outline),
-              title: Text('Gender'),
-              subtitle: Text(userGender),
+              leading: Icon(Icons.email),
+              title: Text('Email'),
+              subtitle: Text(userEmail),
             ),
           ),
           SizedBox(height: 16),
@@ -146,14 +126,7 @@ class _ProfileScreenState extends State<ProfilePage> {
           SizedBox(height: 24),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _buildStatCard('Posts', widget.allPosts.length, Icons.article),
-              _buildStatCard(
-                'Favorites',
-                widget.favoritePosts.length,
-                Icons.favorite,
-              ),
-            ],
+            children: [_buildStatCard('Likes', userLikes, Icons.favorite)],
           ),
         ],
       ),

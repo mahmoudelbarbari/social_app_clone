@@ -1,4 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/day3/widgets/add_post_widget.dart';
 import 'package:flutter_application_1/day4/fav_posts_screen.dart';
 import 'package:flutter_application_1/day4/models/post.dart';
 import 'package:flutter_application_1/day4/my_post_screen.dart';
@@ -57,7 +59,6 @@ class _MyWidgetState extends State<HomeScreen>
       if (_tabController.indexIsChanging) {
         setState(() {
           appBarTitle = tabNames[_tabController.index];
-          // Reset filters when switching tabs
           _filteredPosts = List.from(_posts);
           _filteredFavorites = _posts.where((post) => post.isFavorite).toList();
         });
@@ -66,9 +67,21 @@ class _MyWidgetState extends State<HomeScreen>
   }
 
   void _startSearch() async {
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection("posts")
+        .orderBy('createdAt', descending: true)
+        .get();
+    final firestorePosts = querySnapshot.docs.map((doc) {
+      final data = doc.data();
+      return Posts(
+        title: data['userName'] ?? data['userEmail'] ?? 'Unknown',
+        description: data['description'] ?? '',
+        // Add other fields if needed
+      );
+    }).toList();
     final result = await showSearch<Posts>(
       context: context,
-      delegate: PostSearchDelegate(_posts),
+      delegate: PostSearchDelegate(firestorePosts),
     );
     if (result != null) {
       setState(() {
@@ -103,14 +116,7 @@ class _MyWidgetState extends State<HomeScreen>
   @override
   Widget build(BuildContext context) {
     final List<Widget> tabWidgets = [
-      PostsScreen(
-        posts: _filteredPosts,
-        onFavoriteToggle: (post) {
-          setState(() {
-            post.isFavorite = !post.isFavorite;
-          });
-        },
-      ),
+      PostsScreen(),
       FavPostsScreen(
         favorites: _filteredFavorites,
         onFavoriteToggle: (post) {
@@ -131,13 +137,28 @@ class _MyWidgetState extends State<HomeScreen>
         goToFavorites: () => _tabController.animateTo(1),
         goToAddPost: () => _tabController.animateTo(2),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (context) {
+              return AddPostWidget(
+                onAddTask: () {
+                  setState(() {});
+                },
+              );
+            },
+          );
+        },
+        child: const Icon(Icons.add),
+      ),
       appBar: AppBar(
-        title: Text(appBarTitle),
+        title: Text('Home'),
         centerTitle: true,
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: tabNames.map((name) => Tab(text: name)).toList(),
-        ),
+        // bottom: TabBar(
+        //   controller: _tabController,
+        //   tabs: tabNames.map((name) => Tab(text: name)).toList(),
+        // ),
         actions: [
           if (_tabController.index == 0)
             IconButton(icon: Icon(Icons.search), onPressed: _startSearch),

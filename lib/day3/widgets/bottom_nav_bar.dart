@@ -52,11 +52,12 @@ class _BottomNavBarState extends State<BottomNavBar> {
             context: context,
             builder: (context) {
               return AddPostWidget(
-                onAddTask: (task) {
-                  setState(() {
-                    tasks.add(task);
-                  });
-                },
+                onAddTask: () {},
+                // onAddTask: (task) {
+                //   setState(() {
+                //     tasks.add(task);
+                //   });
+                // },
               );
             },
           );

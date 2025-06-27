@@ -4,7 +4,6 @@ import 'package:flutter_application_1/day4/auth/register_page.dart.dart';
 import 'package:flutter_application_1/day4/home_screen.dart';
 import 'package:flutter_application_1/day4/widgets/bottom_auth_row_widget.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../day3/widgets/common_elevated_button_widget.dart';
 import '../../day3/widgets/login_textfield_widget.dart';
@@ -38,31 +37,10 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   bool passwordVisible = true;
-  Future<void> _loginAccount() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    final savedEmail = prefs.getString('email');
-    final savedPassword = prefs.getString('password');
-
-    if (controllerEmail.text == savedEmail &&
-        controllerPassword.text == savedPassword) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("Login successful !")));
-      Navigator.of(
-        context,
-      ).push(MaterialPageRoute(builder: (context) => HomeScreen()));
-    } else {
-      if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Invalid email or password')));
-    }
-  }
 
   Future<void> _remoteLoginAccount() async {
     try {
-      final credential = FirebaseAuth.instance.signInWithEmailAndPassword(
+      FirebaseAuth.instance.signInWithEmailAndPassword(
         email: controllerEmail.text.trim(),
         password: controllerPassword.text.trim(),
       );
@@ -75,10 +53,41 @@ class _LoginPageState extends State<LoginPage> {
       ).push(MaterialPageRoute(builder: (context) => HomeScreen()));
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
-        print('No user found for that email.');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("No user found for that email.")),
+        );
       } else if (e.code == 'wrong-password') {
-        print('Wrong password provided for that user.');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Wrong password provided for that user.")),
+        );
       }
+    }
+  }
+
+  Future<void> _signInWithGoogle() async {
+    try {
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      if (googleUser == null) return;
+
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      await FirebaseAuth.instance.signInWithCredential(credential);
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Google Sign-In successful!")));
+      // Navigate to home screen if needed
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Google Sign-In failed: $e")));
     }
   }
 
@@ -140,6 +149,32 @@ class _LoginPageState extends State<LoginPage> {
                   },
                 ),
                 prefixIcon: const Icon(Icons.lock_outline),
+              ),
+              sizedBox,
+              ElevatedButton.icon(
+                onPressed: _signInWithGoogle,
+                icon: Image.asset(
+                  'assets/images/google_logo.png',
+                  width: 24,
+                  height: 24,
+                ),
+                label: Text(
+                  'Sign in with Google',
+                  style: TextStyle(fontSize: 16, color: Colors.black87),
+                ),
+              ),
+              sizedBox,
+              ElevatedButton.icon(
+                onPressed: () {},
+                icon: Image.asset(
+                  'assets/images/facebook_logo.png',
+                  width: 24,
+                  height: 24,
+                ),
+                label: Text(
+                  'Sign in with Facebook',
+                  style: TextStyle(fontSize: 16, color: Colors.black87),
+                ),
               ),
               sizedBox,
               CommonElevatedButton(

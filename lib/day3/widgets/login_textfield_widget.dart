@@ -11,6 +11,8 @@ class LoginTextFieldWidget extends StatelessWidget {
     this.isobscureText = false,
     this.textInputType,
     this.labelText,
+    this.maxLines = 1,
+    this.isExpanded = false,
   });
 
   final TextEditingController controller;
@@ -21,6 +23,8 @@ class LoginTextFieldWidget extends StatelessWidget {
   final bool isobscureText;
   final TextInputType? textInputType;
   final String? labelText;
+  final bool isExpanded;
+  final int? maxLines;
 
   @override
   Widget build(BuildContext context) {
@@ -28,6 +32,8 @@ class LoginTextFieldWidget extends StatelessWidget {
       keyboardType: textInputType,
       obscureText: isobscureText,
       style: const TextStyle(fontSize: 20),
+      maxLines: maxLines,
+      expands: isExpanded,
       decoration: InputDecoration(
         border: OutlineInputBorder(),
         floatingLabelBehavior: FloatingLabelBehavior.auto,
