@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:social_app_clone/auth/register_page.dart.dart';
+
+import '../day4/auth/register_page.dart.dart';
 
 class WelcomeSplashWidget extends StatefulWidget {
   const WelcomeSplashWidget({super.key});

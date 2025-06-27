@@ -1,9 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:social_app_clone/auth/register_page.dart.dart';
-import 'package:social_app_clone/widgets/bottom_auth_row_widget.dart';
-import 'package:social_app_clone/widgets/common_elevated_button_widget.dart';
-import 'package:social_app_clone/widgets/login_textfield_widget.dart';
+import 'package:flutter_application_1/day4/auth/register_page.dart.dart';
+import 'package:flutter_application_1/day4/home_screen.dart';
+import 'package:flutter_application_1/day4/widgets/bottom_auth_row_widget.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../day3/widgets/common_elevated_button_widget.dart';
+import '../../day3/widgets/login_textfield_widget.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -34,10 +38,31 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   bool passwordVisible = true;
+  Future<void> _loginAccount() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final savedEmail = prefs.getString('email');
+    final savedPassword = prefs.getString('password');
+
+    if (controllerEmail.text == savedEmail &&
+        controllerPassword.text == savedPassword) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Login successful !")));
+      Navigator.of(
+        context,
+      ).push(MaterialPageRoute(builder: (context) => HomeScreen()));
+    } else {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Invalid email or password')));
+    }
+  }
 
   Future<void> _remoteLoginAccount() async {
     try {
-      FirebaseAuth.instance.signInWithEmailAndPassword(
+      final credential = FirebaseAuth.instance.signInWithEmailAndPassword(
         email: controllerEmail.text.trim(),
         password: controllerPassword.text.trim(),
       );
@@ -45,9 +70,9 @@ class _LoginPageState extends State<LoginPage> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text("Login successful !")));
-      // Navigator.of(
-      //   context,
-      // ).push(MaterialPageRoute(builder: (context) => HomeScreen()));
+      Navigator.of(
+        context,
+      ).push(MaterialPageRoute(builder: (context) => HomeScreen()));
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
         print('No user found for that email.');

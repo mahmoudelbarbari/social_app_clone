@@ -1,9 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:social_app_clone/auth/login_page.dart';
-import 'package:social_app_clone/widgets/bottom_auth_row_widget.dart';
-import 'package:social_app_clone/widgets/common_elevated_button_widget.dart';
-import 'package:social_app_clone/widgets/login_textfield_widget.dart';
+import 'package:flutter_application_1/day4/auth/login_page.dart';
+import 'package:flutter_application_1/day4/widgets/bottom_auth_row_widget.dart';
+
+import '../../day3/widgets/common_elevated_button_widget.dart';
+import '../../day3/widgets/login_textfield_widget.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});

@@ -1,7 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:social_app_clone/firebase_options.dart';
-import 'package:social_app_clone/widgets/welcome_splash_widget.dart';
+import 'package:flutter_application_1/day4/widgets/welcome_splash_widget.dart';
+import 'package:flutter_application_1/firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
