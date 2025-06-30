@@ -83,7 +83,9 @@ class _LoginPageState extends State<LoginPage> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text("Google Sign-In successful!")));
-      // Navigate to home screen if needed
+      Navigator.of(
+        context,
+      ).push(MaterialPageRoute(builder: (context) => HomeScreen()));
     } catch (e) {
       ScaffoldMessenger.of(
         context,
